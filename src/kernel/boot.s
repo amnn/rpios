@@ -1,141 +1,99 @@
         .section .init
-        .global _start
+        .global start
 
-_start: @@ Entry point to the kernel.
+start:  // Entry point to the kernel.
+        mov     sp,     #0x8000
+        b       main
 
-        ldr r0, =GPIO
+        .section .text
+main:    // GPIO Pin 16 is the ACT LED.
+        mov     r0,     #16
+        ldr     r1,     =GPIO_FUNC_OUT
+        ldr     r1,     [r1]
+        bl      gpio_set_function
 
-        @ GPIO Pin 16 is Output
-        mov r1, #1
-        lsl r1, #18
-        str r1, [r0, #4]
+        bl      h
+        bl      e
+        bl      l
+        bl      l
+        bl      o
 
-_sloop: @ Flash "hello world"
-        bl h
-        bl e
-        bl l
-        bl l
-        bl o
-        bl word
-        bl w
-        bl o
-        bl r
-        bl l
-        bl d
-        bl word
-        bl word
-        b _sloop
+        // Halt and Catch Fire
+_hacf:  b       _hacf
 
-        @ Halt and Catch Fire
-_hacf:  b _hacf
+delay:  // Wait for `n` units of time.
+        //
+        // n : r0    Units of time.
 
-GPIO:   @@ Base Address of the GPIO Registers.
-        .word 0x20200000
+        ldr     r1,     =0x200000
+        mul     r1,     r0
+_dloop: subs    r1,     #1
+        bne     _dloop
+        bx      lr
 
-delay:  @@ Wait for `n` units of time.
-        @@
-        @@ n : r0    Units of time.
+dot:    // Turn the LED on for the length of a morse code dot.
 
-        ldr r1, =0x200000
-        mul r1, r0
-_dloop: subs r1, #1
-        bne _dloop
-        bx lr
+        push    {lr}
+        mov     r0,     #16
+        bl      gpio_off
+        mov     r0,     #1
+        bl      delay
+        mov     r0,     #16
+        bl      gpio_on
+        mov     r0,     #1
+        bl      delay
+        pop     {pc}
 
-clear:  @@ Clear output on GPIO pin 16
+dash:   // Turn the LED on for the length of a morse code dash.
 
-        ldr r0, GPIO
-        mov r1, #1
-        lsl r1, #16
-        str r1, [r0, #40]
-        bx lr
+        push    {lr}
+        mov     r0,     #16
+        bl      gpio_off
+        mov     r0,     #2
+        bl      delay
+        mov     r0,     #16
+        bl      gpio_on
+        mov     r0,     #1
+        bl      delay
+        pop     {pc}
 
-set:    @@ Set output on GPIO pin 16
+letter: // Wait for the length of a space.
+        push    {lr}
+        mov     r0,     #1
+        bl      delay
+        pop     {pc}
 
-        ldr r0, GPIO
-        mov r1, #1
-        lsl r1, #16
-        str r1, [r0, #28]
-        bx lr
+word:   // Wait for the length of a space.
+        push    {lr}
+        mov     r0,     #3
+        bl      delay
+        pop     {pc}
 
-dot:    @@ Turn the LED on for the length of a morse code dot.
+        // Morse code alphabet
+h:      push    {lr}
+        bl      dot
+        bl      dot
+        bl      dot
+        bl      dot
+        bl      letter
+        pop     {pc}
 
-        push {lr}
-        bl clear
-        mov r0, #1
-        bl delay
-        bl set
-        mov r0, #1
-        bl delay
-        pop {pc}
+e:      push    {lr}
+        bl      dot
+        bl      letter
+        pop     {pc}
 
-dash:   @@ Turn the LED on for the length of a morse code dash.
+l:      push    {lr}
+        bl      dot
+        bl      dash
+        bl      dot
+        bl      dot
+        bl      letter
+        pop     {pc}
 
-        push {lr}
-        bl clear
-        mov r0, #2
-        bl delay
-        bl set
-        mov r0, #1
-
-letter: @@ Wait for the length of a space.
-        push {lr}
-        mov r0, #1
-        bl delay
-        pop {pc}
-
-word:   @@ Wait for the length of a space.
-        push {lr}
-        mov r0, #3
-        bl delay
-        pop {pc}
-
-        @@ Morse code alphabet
-h:      push {lr}
-        bl dot
-        bl dot
-        bl dot
-        bl dot
-        bl letter
-        pop {pc}
-
-e:      push {lr}
-        bl dot
-        bl letter
-        pop {pc}
-
-l:      push {lr}
-        bl dot
-        bl dash
-        bl dot
-        bl dot
-        bl letter
-        pop {pc}
-
-o:      push {lr}
-        bl dash
-        bl dash
-        bl dash
-        bl letter
-        pop {pc}
-
-w:      push {lr}
-        bl dot
-        bl dash
-        bl dash
-        bl letter
-        pop {pc}
-
-r:      push {lr}
-        bl dot
-        bl dash
-        bl dot
-        bl letter
-        pop {pc}
-
-d:      push {lr}
-        bl dash
-        bl dot
-        bl dot
-        bl letter
-        pop {pc}
+o:      push    {lr}
+        bl      dash
+        bl      dash
+        bl      dash
+        bl      letter
+        pop     {pc}
