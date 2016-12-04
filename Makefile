@@ -14,7 +14,7 @@ KOBJECTS	= $(patsubst $(SRC)/%.s,$(BUILD)/%.o,$(KSRCS))
 all: $(BUILD)/kernel.img $(BUILD)/kernel.list
 
 $(BUILD)/kernel.list: $(BUILD)/kernel.elf
-	$(OBJDUMP) -d $< > $@
+	$(OBJDUMP) -D $< > $@
 
 $(BUILD)/kernel.img: $(BUILD)/kernel.elf
 	$(OBJCOPY) $< -O binary $@
