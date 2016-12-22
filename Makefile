@@ -11,6 +11,9 @@ BUILD           = build
 KSRCS		= $(wildcard $(SRC)/kernel/*.s)
 KOBJECTS	= $(patsubst $(SRC)/%.s,$(BUILD)/%.o,$(KSRCS))
 
+DEST		= /Volumes/boot
+
+.PHONY: all
 all: $(BUILD)/kernel.img $(BUILD)/kernel.list
 
 $(BUILD)/kernel.list: $(BUILD)/kernel.elf
@@ -24,3 +27,12 @@ $(BUILD)/kernel.elf: $(KOBJECTS) $(LINKSCRIPT)
 
 $(BUILD)/%.o: $(SRC)/%.s
 	$(AS) -o $@ $<
+
+.PHONY: clean
+clean:
+	rm -rf $(BUILD)/*
+	mkdir -p $(BUILD)/kernel
+
+.PHONY: upload
+upload: $(BUILD)/kernel.img
+	cp -f $(BUILD)/kernel.img $(DEST)/kernel.img

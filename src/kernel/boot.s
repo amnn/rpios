@@ -12,6 +12,9 @@ main:    // GPIO Pin 16 is the ACT LED.
         ldr     r1,     [r1]
         bl      gpio_set_function
 
+        bl      irq_init
+        swi     #0
+
 _m1:    ldr     r0,     =HELLO
         bl      output_morse
         b       _m1
