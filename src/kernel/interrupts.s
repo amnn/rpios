@@ -116,7 +116,7 @@ $id1:   subs    r0,     #32
 irq_handle_reset:
         ldr     r0,     =ONE
         bl      output_morse
-        b       irq_handle_reset
+        mov     pc,     #0x8000
 ONE:    .asciz "1"
 
         .global irq_handle_undef
@@ -128,30 +128,37 @@ TWO:    .asciz "2"
 
         .global irq_handle_swi
 irq_handle_swi:
+        stmfd   sp!,    {lr}
         ldr     r0,     =THREE
         bl      output_morse
-        b       irq_handle_swi
+        ldmfd   sp!,    {pc}^
 THREE:  .asciz "3"
 
         .global irq_handle_prefetch_abort
 irq_handle_prefetch_abort:
+        sub     lr,     #4
+        stmfd   sp!,    {lr}
         ldr     r0,     =FOUR
         bl      output_morse
-        b       irq_handle_prefetch_abort
+        ldmfd   sp!,    {pc}^
 FOUR:   .asciz "4"
 
         .global irq_handle_data_abort
 irq_handle_data_abort:
+        sub     lr,     #8
+        stmfd   sp!,    {lr}
         ldr     r0,     =FIVE
         bl      output_morse
-        b       irq_handle_data_abort
+        ldmfd   sp!,    {pc}^
 FIVE:   .asciz "5"
 
         .global irq_handle_irq
 irq_handle_irq:
+        sub     lr,     #4
+        stmfd   sp!,    {lr}
         ldr     r0,     =SIX
         bl      output_morse
-        b       irq_handle_irq
+        ldmfd   sp!,    {pc}^
 SIX:    .asciz "6"
 
         /** Interrupt Service Routine Vector Table */
